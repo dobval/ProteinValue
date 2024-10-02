@@ -5,6 +5,7 @@ import 'models/food_item.dart';
 import 'views/folder.dart';
 
 //TODO: Organize all views separately into views/ !
+//TODO: Add multiple currencies, option to switch
 void main() {
   runApp(
     ChangeNotifierProvider(
