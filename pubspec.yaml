@@ -1,4 +1,4 @@
-name: proteinvalue_flutter
+name: proteinvalue
 description: "Android App for adding and managing food entries with price, weight, protein/100g, kcal/100g. The goal is to gain insights on protein-dense, cheap, low-calorie foods."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
