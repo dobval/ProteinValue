@@ -6,10 +6,6 @@ IssueTracker: https://github.com/dobval/ProteinValue/issues
 Changelog: https://github.com/dobval/ProteinValue/releases
 
 AutoName: ProteinValue
-Summary: "Analyze and track groceries for protein, calories, and cost"
-Description: |
-  Helps you add and manage food entries with price, weight, protein/100g, kcal/100g. The goal is to gain insights into protein-dense, affordable, and low-calorie foods. Ever wondered if powdered protein offers more than skyr, meat, etc.? This app helps you find out!
-
 RepoType: git
 Repo: https://github.com/dobval/ProteinValue.git
 Binaries: https://github:com/dobval/ProteinValue/releases/download/v%v/ProteinValue-%v.apk
