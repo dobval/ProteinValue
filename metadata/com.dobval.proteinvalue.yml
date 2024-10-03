@@ -1,0 +1,39 @@
+Categories:
+  - Sports & Health
+License: GPL-3.0-only
+SourceCode: https://github.com/dobval/ProteinValue
+IssueTracker: https://github.com/dobval/ProteinValue/issues
+Changelog: https://github.com/dobval/ProteinValue/releases
+
+AutoName: ProteinValue
+Summary: "Analyze and track groceries for protein, calories, and cost"
+Description: |
+  Helps you add and manage food entries with price, weight, protein/100g, kcal/100g. The goal is to gain insights into protein-dense, affordable, and low-calorie foods. Ever wondered if powdered protein offers more than skyr, meat, etc.? This app helps you find out!
+
+RepoType: git
+Repo: https://github.com/dobval/ProteinValue.git
+Binaries: https://github:com/dobval/ProteinValue/releases/download/v%v/ProteinValue-%v.apk
+
+Builds:
+  - versionName: "0.1"
+    versionCode: 1
+    commit: 3787482aece9f339ae45231d2cfc65d5876192fd
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.24.3
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AllowedAPKSigningKeys: "21104f8caa8148f3c7e72cb717ca63c8f673c5176dc9f5c1c1221291e0d41cb2"
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: "0.1"
+CurrentVersionCode: 1
