@@ -6,6 +6,7 @@ IssueTracker: https://github.com/dobval/ProteinValue/issues
 Changelog: https://github.com/dobval/ProteinValue/releases
 
 AutoName: ProteinValue
+
 RepoType: git
 Repo: https://github.com/dobval/ProteinValue.git
 Binaries: https://github:com/dobval/ProteinValue/releases/download/v%v/ProteinValue-%v.apk
@@ -28,6 +29,7 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
 
 AllowedAPKSigningKeys: 21104f8caa8148f3c7e72cb717ca63c8f673c5176dc9f5c1c1221291e0d41cb2
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
