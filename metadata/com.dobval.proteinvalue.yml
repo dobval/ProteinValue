@@ -11,7 +11,7 @@ Repo: https://github.com/dobval/ProteinValue.git
 Binaries: https://github:com/dobval/ProteinValue/releases/download/v%v/ProteinValue-%v.apk
 
 Builds:
-  - versionName: "0.1"
+  - versionName: '0.1'
     versionCode: 1
     commit: 3787482aece9f339ae45231d2cfc65d5876192fd
     output: build/app/outputs/flutter-apk/app-release.apk
@@ -27,9 +27,9 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
-AllowedAPKSigningKeys: "21104f8caa8148f3c7e72cb717ca63c8f673c5176dc9f5c1c1221291e0d41cb2"
+AllowedAPKSigningKeys: 21104f8caa8148f3c7e72cb717ca63c8f673c5176dc9f5c1c1221291e0d41cb2
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: "0.1"
+CurrentVersion: '0.1'
 CurrentVersionCode: 1
