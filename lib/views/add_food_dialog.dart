@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:proteinvalue_flutter/models/food_item.dart';
+import 'package:proteinvalue/models/food_item.dart';
 import '../controllers/db_controller.dart';
 
 class AddFoodDialog extends StatelessWidget {

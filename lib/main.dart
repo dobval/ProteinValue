@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:proteinvalue_flutter/controllers/db_controller.dart';
+import 'package:proteinvalue/controllers/db_controller.dart';
 import 'package:provider/provider.dart';
 import 'models/food_item.dart';
 import 'views/folder.dart';

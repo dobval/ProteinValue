@@ -1,4 +1,4 @@
-package com.dobval.proteinvalue_flutter
+package com.dobval.proteinvalue
 
 import io.flutter.embedding.android.FlutterActivity
 
