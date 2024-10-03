@@ -1,1 +1,5 @@
- Helps you add and manage food entries with price, weight, protein/100g, kcal/100g. The goal is to gain insights into protein-dense, affordable, and low-calorie foods. Ever wondered if powdered protein offers more than skyr, meat, etc.? This app helps you find out!
+Helps you add and manage food entries with price, weight, protein/100g, kcal/100g.
+The goal is to gain insights into protein-dense, affordable, and low-calorie foods.
+Ever wondered if powdered protein offers more than skyr, meat, etc.? This app helps
+you find out.
+.
