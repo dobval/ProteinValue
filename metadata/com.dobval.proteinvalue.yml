@@ -33,5 +33,5 @@ AllowedAPKSigningKeys: 21104f8caa8148f3c7e72cb717ca63c8f673c5176dc9f5c1c1221291e
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: '0.1'
+CurrentVersion: '0.1.0'
 CurrentVersionCode: 1
