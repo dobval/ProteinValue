@@ -14,7 +14,7 @@ Binaries: https://github:com/dobval/ProteinValue/releases/download/v%v/ProteinVa
 Builds:
   - versionName: '0.1'
     versionCode: 1
-    commit: 3787482aece9f339ae45231d2cfc65d5876192fd
+    commit: 5e8214068bd123ac48e336b70dd9ae071563acda
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@3.24.3
