@@ -12,7 +12,7 @@ Repo: https://github.com/dobval/ProteinValue.git
 Binaries: https://github:com/dobval/ProteinValue/releases/download/v%v/ProteinValue-%v.apk
 
 Builds:
-  - versionName: '0.1'
+  - versionName: '0.1.0'
     versionCode: 1
     commit: 5e8214068bd123ac48e336b70dd9ae071563acda
     output: build/app/outputs/flutter-apk/app-release.apk
