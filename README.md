@@ -2,12 +2,14 @@
 
 Android App for adding and managing food entries with price, weight, protein/100g, kcal/100g. The goal is to gain insights on protein-dense, cheap, low-calorie foods.
 Ever wondered if powdered protein offers more than skyr, meat etc? Well I sure did, so I made this.
+foods.
 
-<img src="https://github.com/user-attachments/assets/02b22067-d75b-4b25-b5f5-d38134b0163b" width=280>
-<img src="https://github.com/user-attachments/assets/ec36c034-386e-4b41-801f-d144dea5438d" width=280>
-
-<img src="https://github.com/user-attachments/assets/98f92a64-5061-4206-86b2-059e7c73bba6" width=280>
-<img src="https://github.com/user-attachments/assets/bbc71091-4257-4cb7-aa48-abb7b1c03de7" width=280>
+<div align="center">
+    <img src="https://github.com/user-attachments/assets/02b22067-d75b-4b25-b5f5-d38134b0163b" align=center width=300>
+    <img src="https://github.com/user-attachments/assets/ec36c034-386e-4b41-801f-d144dea5438d" align=center width=300>
+    <img src="https://github.com/user-attachments/assets/98f92a64-5061-4206-86b2-059e7c73bba6" align=center width=300>
+    <img src="https://github.com/user-attachments/assets/bbc71091-4257-4cb7-aa48-abb7b1c03de7" align=center width=300>
+</div>
 
 ## Setup
 
