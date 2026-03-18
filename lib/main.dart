@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:proteinvalue/controllers/db_controller.dart';
+import 'package:proteinvalue/controllers/db_helper.dart';
 import 'package:provider/provider.dart';
 import 'models/food_item.dart';
+import 'models/rankings.dart';
 import 'views/folder.dart';
 
-//TODO: Organize all views separately into views/ !
-//TODO: Add multiple currencies, option to switch
 void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeNotifier(),
-      child: ProteinValueApp(),
+      child: const ProteinValueApp(),
     ),
   );
 }
@@ -48,18 +47,24 @@ class AppHomePage extends StatefulWidget {
 }
 
 class _AppHomePageState extends State<AppHomePage> {
+  static const int kTopItemsCount = 10;
+  static const double kRatioScale = 100.0;
+
   final DBController _controller = DBController();
   List<FoodItem> _foodItems = [];
 
-  int _selectedIndex = 0; // Drawer selected view
-  String _selectedRanking = 'Cheap Protein-Rich';
-  String _rankingExplanation = '';
+  int _selectedIndex = 0;
+  Rankings _selectedRanking = Rankings.cheapProteinRich;
+
+  late SortBy _sortBy;
+  late bool _isAscending;
 
   @override
   void initState() {
     super.initState();
+    _sortBy = SortBy.name;
+    _isAscending = true;
     _loadFoodItems();
-    _updateRankingExplanation();
   }
 
   Future<void> _loadFoodItems() async {
@@ -99,7 +104,7 @@ class _AppHomePageState extends State<AppHomePage> {
               onTap: () {
                 if (_selectedIndex != 0) {
                   setState(() {
-                    _selectedIndex = 0; // Updates index
+                    _selectedIndex = 0;
                   });
                 }
                 Navigator.pop(context);
@@ -112,8 +117,7 @@ class _AppHomePageState extends State<AppHomePage> {
                   setState(() {
                     _selectedIndex = 1;
                   });
-                  Navigator.pop(context); // Close the drawer after switching
-                  // Add navigation logic here for Rankings if needed
+                  Navigator.pop(context);
                 } else {
                   Navigator.pop(context);
                 }
@@ -126,26 +130,17 @@ class _AppHomePageState extends State<AppHomePage> {
           ? _buildFoodItemList()
           : Column(
               children: [
-                DropdownButton<String>(
+                DropdownButton<Rankings>(
                   value: _selectedRanking,
-                  items: const [
-                    DropdownMenuItem(
-                        value: 'Cheap Protein-Rich',
-                        child: Center(child: Text('Cheap Protein-Rich'))),
-                    DropdownMenuItem(
-                        value: 'Lean Protein-Rich',
-                        child: Center(child: Text('Lean Protein-Rich'))),
-                    DropdownMenuItem(
-                        value: 'Cheap Lean Protein-Rich',
-                        child: Center(child: Text('Cheap Lean Protein-Rich'))),
-                    DropdownMenuItem(
-                        value: 'Cheap High-Calorie',
-                        child: Center(child: Text('Cheap High-Calorie'))),
-                  ],
-                  onChanged: (String? newValue) {
+                  items: Rankings.values.map((ranking) {
+                    return DropdownMenuItem(
+                      value: ranking,
+                      child: Center(child: Text(ranking.displayName)),
+                    );
+                  }).toList(),
+                  onChanged: (Rankings? newValue) {
                     setState(() {
                       _selectedRanking = newValue!;
-                      _updateRankingExplanation();
                     });
                   },
                   isExpanded: true,
@@ -171,7 +166,7 @@ class _AppHomePageState extends State<AppHomePage> {
                   builder: (context) {
                     return AlertDialog(
                       title: const Text('Ranking Formula'),
-                      content: Text(_rankingExplanation),
+                      content: Text(_selectedRanking.explanation),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
@@ -182,7 +177,7 @@ class _AppHomePageState extends State<AppHomePage> {
                   },
                 );
               },
-            ), // No FAB on Rankings
+            ),
     );
   }
 
@@ -197,11 +192,9 @@ class _AppHomePageState extends State<AppHomePage> {
               color: Theme.of(context).colorScheme.surface,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                // 5 pixels padding
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Column headers with sorting functionality
                     Row(
                       children: [
                         Expanded(
@@ -239,7 +232,6 @@ class _AppHomePageState extends State<AppHomePage> {
                   onLongPress: () => _showDeleteConfirmationDialog(foodItem),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    // 5 pixels padding
                     child: Row(
                       children: [
                         Expanded(
@@ -272,137 +264,52 @@ class _AppHomePageState extends State<AppHomePage> {
     );
   }
 
-  List<FoodItem> _getTop10ItemsByProteinPriceRatio() {
-    List<FoodItem> sortedItems = List.from(_foodItems);
+  List<FoodItem> _getRankedItems() {
+    final sortedItems = List<FoodItem>.from(_foodItems);
     sortedItems.sort((a, b) {
-      double ratioA =
-          a.price > 0 ? (a.protein100g * a.grams) / (a.price * 100) : 0;
-      double ratioB =
-          b.price > 0 ? (b.protein100g * b.grams) / (b.price * 100) : 0;
-      return ratioB.compareTo(ratioA); // Descending order
+      final ratioA = _calculateRankRatio(a);
+      final ratioB = _calculateRankRatio(b);
+      return ratioB.compareTo(ratioA);
     });
-
-    return sortedItems.take(10).toList();
+    return sortedItems.take(kTopItemsCount).toList();
   }
 
-  List<FoodItem> _getTop10ItemsByProteinKcalRatio() {
-    List<FoodItem> sortedItems = List.from(_foodItems);
-    sortedItems.sort((a, b) {
-      double ratioA = a.price > 0 ? (a.protein100g) / a.kcal100g : 0;
-      double ratioB = b.price > 0 ? (b.protein100g) / b.kcal100g : 0;
-      return ratioB.compareTo(ratioA); // Descending order
-    });
-
-    return sortedItems.take(10).toList();
-  }
-
-  List<FoodItem> _getTop10ItemsByProteinPriceKcalRatio() {
-    List<FoodItem> sortedItems = List.from(_foodItems);
-    sortedItems.sort((a, b) {
-      double ratioA = a.price > 0
-          ? (a.protein100g * a.grams) / (a.price * 100 * a.kcal100g)
-          : 0;
-      double ratioB = b.price > 0
-          ? (b.protein100g * b.grams) / (b.price * 100 * b.kcal100g)
-          : 0;
-      return ratioB.compareTo(ratioA); // Descending order
-    });
-
-    return sortedItems.take(10).toList();
-  }
-
-  List<FoodItem> _getTop10ItemsByKcalPriceRatio() {
-    List<FoodItem> sortedItems = List.from(_foodItems);
-    sortedItems.sort((a, b) {
-      double ratioA =
-          a.price > 0 ? (a.kcal100g * a.grams) / (a.price * 100) : 0;
-      double ratioB =
-          b.price > 0 ? (b.kcal100g * b.grams) / (b.price * 100) : 0;
-      return ratioB.compareTo(ratioA); // Descending order
-    });
-
-    return sortedItems.take(10).toList();
+  double _calculateRankRatio(FoodItem item) {
+    switch (_selectedRanking) {
+      case Rankings.cheapProteinRich:
+        return item.price > 0
+            ? (item.protein100g * item.grams) / (item.price * kRatioScale)
+            : 0;
+      case Rankings.leanProteinRich:
+        return item.kcal100g > 0 ? item.protein100g / item.kcal100g : 0;
+      case Rankings.cheapLeanProteinRich:
+        return (item.price > 0 && item.kcal100g > 0)
+            ? (item.protein100g * item.grams) /
+                (item.price * kRatioScale * item.kcal100g)
+            : 0;
+      case Rankings.cheapHighCalorie:
+        return item.price > 0
+            ? (item.kcal100g * item.grams) / (item.price * kRatioScale)
+            : 0;
+    }
   }
 
   Widget _buildRankingView() {
-    List<FoodItem> top10Items;
-
-    switch (_selectedRanking) {
-      case 'Cheap Protein-Rich':
-        top10Items = _getTop10ItemsByProteinPriceRatio();
-        break;
-      case 'Lean Protein-Rich':
-        top10Items = _getTop10ItemsByProteinKcalRatio();
-        break;
-      case 'Cheap Lean Protein-Rich':
-        top10Items = _getTop10ItemsByProteinPriceKcalRatio();
-        break;
-      case 'Cheap High-Calorie':
-        top10Items = _getTop10ItemsByKcalPriceRatio();
-        break;
-      default:
-        top10Items =
-            _getTop10ItemsByProteinPriceRatio(); // default to 'Cheap Protein-Rich'
-    }
+    final topItems = _getRankedItems();
 
     return ListView.builder(
-      itemCount: top10Items.length,
+      itemCount: topItems.length,
       itemBuilder: (context, index) {
-        final item = top10Items[index];
-        double ratio;
-
-        switch (_selectedRanking) {
-          case 'Cheap Protein-Rich':
-            ratio = item.price > 0
-                ? (item.protein100g * item.grams) / (item.price * 100)
-                : 0;
-            break;
-          case 'Lean Protein-Rich':
-            ratio = item.kcal100g > 0 ? (item.protein100g) / item.kcal100g : 0;
-            break;
-          case 'Cheap Lean Protein-Rich':
-            ratio = (item.price > 0 && item.kcal100g > 0)
-                ? (item.protein100g * item.grams) /
-                    (item.price * 100 * item.kcal100g)
-                : 0;
-            break;
-          case 'Cheap High-Calorie':
-            ratio = item.price > 0
-                ? (item.kcal100g * item.grams) / (item.price * 100)
-                : 0;
-            break;
-          default:
-            ratio = 0;
-        }
+        final item = topItems[index];
+        final ratio = _calculateRankRatio(item);
 
         return ListTile(
           title: Text('${index + 1}. ${item.name}'),
-          subtitle: Text('$_selectedRanking: ${ratio.toStringAsFixed(2)}'),
+          subtitle:
+              Text('${_selectedRanking.formula}: ${ratio.toStringAsFixed(2)}'),
         );
       },
     );
-  }
-
-  void _updateRankingExplanation() {
-    switch (_selectedRanking) {
-      case 'Cheap Protein-Rich':
-        _rankingExplanation =
-            'Calculated as Protein/Price. Example: (11*5)/1,49 = 36,92g for 1€ (ja! Skyr Natur 500g 1,49€; 11g Protein per 100g).';
-        break;
-      case 'Lean Protein-Rich':
-        _rankingExplanation =
-            'Calculated as Protein/Kcal. Example: Chicken Breast';
-        break;
-      case 'Cheap Lean Protein-Rich':
-        _rankingExplanation =
-            'Calculated as (Protein/Price)/Kcal. Example: Low-fat Cheese';
-        break;
-      case 'Cheap High-Calorie':
-        _rankingExplanation = 'Calculated as Kcal/Price. Examples: Flour, Oil';
-        break;
-      default:
-        _rankingExplanation = 'Select a ranking to see the formula.';
-    }
   }
 
   void _showAddFoodDialog(BuildContext context) {
@@ -456,19 +363,14 @@ class _AppHomePageState extends State<AppHomePage> {
       switch (_sortBy) {
         case SortBy.name:
           comparison = a.name.compareTo(b.name);
-          break;
         case SortBy.price:
           comparison = a.price.compareTo(b.price);
-          break;
         case SortBy.protein:
           comparison = a.protein100g.compareTo(b.protein100g);
-          break;
         case SortBy.kcal:
           comparison = a.kcal100g.compareTo(b.kcal100g);
-          break;
         case SortBy.grams:
           comparison = a.grams.compareTo(b.grams);
-          break;
       }
       return _isAscending ? comparison : -comparison;
     });
@@ -480,7 +382,7 @@ class _AppHomePageState extends State<AppHomePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Flexible(
-          fit: FlexFit.tight, // Ensure it takes up available space
+          fit: FlexFit.tight,
           child: Row(
             children: [
               Expanded(
@@ -493,8 +395,7 @@ class _AppHomePageState extends State<AppHomePage> {
                   ),
                 ),
               ),
-              if (_sortBy ==
-                  sortBy) // Show sort indicator if this column is being sorted
+              if (_sortBy == sortBy)
                 Icon(
                   _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
                   size: 16.0,
@@ -510,13 +411,12 @@ class _AppHomePageState extends State<AppHomePage> {
   void _onHeaderTap(SortBy sortBy) {
     setState(() {
       if (_sortBy == sortBy) {
-        _isAscending =
-            !_isAscending; // Toggle sort order if the same header is tapped
+        _isAscending = !_isAscending;
       } else {
         _sortBy = sortBy;
-        _isAscending = true; // Default to ascending on new sort field
+        _isAscending = true;
       }
-      _sortFoodItems(); // Sort the list
+      _sortFoodItems();
     });
   }
 }
@@ -524,7 +424,7 @@ class _AppHomePageState extends State<AppHomePage> {
 class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 
-  _SliverHeaderDelegate({required this.child});
+  const _SliverHeaderDelegate({required this.child});
 
   @override
   double get minExtent => 60.0;
@@ -551,6 +451,3 @@ enum SortBy {
   kcal,
   grams,
 }
-
-SortBy _sortBy = SortBy.name;
-bool _isAscending = true;

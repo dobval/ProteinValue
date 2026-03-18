@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ThemeNotifier with ChangeNotifier {
+  static const int kColorCount = 18;
+
   int _colorIndex = 0;
 
-  // List of all built-in Material colors
   final List<Color> _colors = [
     Colors.red,
     Colors.pink,
@@ -28,7 +29,7 @@ class ThemeNotifier with ChangeNotifier {
 
   // Method to cycle through colors
   void _changeColorScheme() {
-    _colorIndex = (_colorIndex + 1) % _colors.length;
+    _colorIndex = (_colorIndex + 1) % kColorCount;
     notifyListeners(); // Notify listeners of change
   }
 
