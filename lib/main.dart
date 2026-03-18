@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:proteinvalue/controllers/db_helper.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models/food_item.dart';
 import 'models/rankings.dart';
 import 'views/folder.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final colorIndex = prefs.getInt(ThemeNotifier.kColorIndexKey) ?? 0;
+  final themeNotifier = ThemeNotifier(colorIndex);
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeNotifier(),
+    ChangeNotifierProvider<ThemeNotifier>.value(
+      value: themeNotifier,
       child: const ProteinValueApp(),
     ),
   );
