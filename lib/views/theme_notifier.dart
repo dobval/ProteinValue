@@ -45,7 +45,11 @@ class ThemeNotifier with ChangeNotifier {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: _colors[_colorIndex],
+        brightness: Brightness.light,
       ),
+      scaffoldBackgroundColor: Colors.white,
+      canvasColor: Colors.white,
+      useMaterial3: true,
     );
   }
 

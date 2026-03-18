@@ -106,30 +106,33 @@ class _AppHomePageState extends State<AppHomePage> {
         ],
       ),
       drawer: _buildDrawer(),
-      body: _selectedIndex == 0
-          ? _buildFoodItemList()
-          : Column(
-              children: [
-                DropdownButton<Rankings>(
-                  value: _selectedRanking,
-                  items: Rankings.values.map((ranking) {
-                    return DropdownMenuItem(
-                      value: ranking,
-                      child: Center(child: Text(ranking.displayName)),
-                    );
-                  }).toList(),
-                  onChanged: (Rankings? newValue) {
-                    setState(() {
-                      _selectedRanking = newValue!;
-                    });
-                  },
-                  isExpanded: true,
-                ),
-                Expanded(
-                  child: _buildRankingView(),
-                ),
-              ],
-            ),
+      body: ColoredBox(
+        color: Colors.white,
+        child: _selectedIndex == 0
+            ? _buildFoodItemList()
+            : Column(
+                children: [
+                  DropdownButton<Rankings>(
+                    value: _selectedRanking,
+                    items: Rankings.values.map((ranking) {
+                      return DropdownMenuItem(
+                        value: ranking,
+                        child: Center(child: Text(ranking.displayName)),
+                      );
+                    }).toList(),
+                    onChanged: (Rankings? newValue) {
+                      setState(() {
+                        _selectedRanking = newValue!;
+                      });
+                    },
+                    isExpanded: true,
+                  ),
+                  Expanded(
+                    child: _buildRankingView(),
+                  ),
+                ],
+              ),
+      ),
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
               onPressed: () => _showAddFoodDialog(context),
@@ -292,53 +295,19 @@ class _AppHomePageState extends State<AppHomePage> {
 
   Widget _buildFoodItemList() {
     return CustomScrollView(
-      scrollDirection: Axis.vertical,
       slivers: [
         SliverPersistentHeader(
           pinned: true,
-          delegate: _SliverHeaderDelegate(
-            child: Container(
-              color: Theme.of(context).colorScheme.surface,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                            flex: 2,
-                            child: _buildHeaderCell('Name', _SortBy.name)),
-                        Expanded(
-                            flex: 1,
-                            child: _buildHeaderCell('Price', _SortBy.price)),
-                        Expanded(
-                            flex: 1,
-                            child: _buildHeaderCell(
-                                'Protein/100g', _SortBy.protein)),
-                        Expanded(
-                            flex: 1,
-                            child: _buildHeaderCell('Kcal/100g', _SortBy.kcal)),
-                        Expanded(
-                            flex: 1,
-                            child: _buildHeaderCell('Grams', _SortBy.grams)),
-                      ],
-                    ),
-                    const Divider(),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          delegate: _FoodListHeaderDelegate(_buildFoodListHeader),
         ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final foodItem = _foodItems[index];
-              return Container(
-                color: Theme.of(context).colorScheme.surface,
-                child: GestureDetector(
-                  onLongPress: () => _showDeleteConfirmationDialog(foodItem),
+              return GestureDetector(
+                onLongPress: () => _showDeleteConfirmationDialog(foodItem),
+                child: Container(
+                  color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5.0),
                     child: Row(
@@ -486,38 +455,6 @@ class _AppHomePageState extends State<AppHomePage> {
     });
   }
 
-  Widget _buildHeaderCell(String title, _SortBy sortBy) {
-    return GestureDetector(
-      onTap: () => _onHeaderTap(sortBy),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Flexible(
-          fit: FlexFit.tight,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  softWrap: true,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ),
-              if (_sortBy == sortBy)
-                Icon(
-                  _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 16.0,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _onHeaderTap(_SortBy sortBy) {
     setState(() {
       if (_sortBy == sortBy) {
@@ -528,6 +465,35 @@ class _AppHomePageState extends State<AppHomePage> {
       }
       _sortFoodItems();
     });
+  }
+
+  Widget _buildHeaderCell(String title, _SortBy sortBy) {
+    return GestureDetector(
+      onTap: () => _onHeaderTap(sortBy),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                softWrap: true,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+            if (_sortBy == sortBy)
+              Icon(
+                _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 16.0,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showCreateRegionDialog() {
@@ -778,12 +744,40 @@ class _AppHomePageState extends State<AppHomePage> {
       SnackBar(content: Text(message)),
     );
   }
+
+  Widget _buildFoodListHeader(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(flex: 2, child: _buildHeaderCell('Name', _SortBy.name)),
+              Expanded(
+                  flex: 1, child: _buildHeaderCell('Price', _SortBy.price)),
+              Expanded(
+                  flex: 1,
+                  child: _buildHeaderCell('Protein/100g', _SortBy.protein)),
+              Expanded(
+                  flex: 1, child: _buildHeaderCell('Kcal/100g', _SortBy.kcal)),
+              Expanded(
+                  flex: 1, child: _buildHeaderCell('Grams', _SortBy.grams)),
+            ],
+          ),
+          const Divider(),
+        ],
+      ),
+    );
+  }
 }
 
-class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
+class _FoodListHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget Function(BuildContext) builder;
 
-  const _SliverHeaderDelegate({required this.child});
+  _FoodListHeaderDelegate(this.builder);
 
   @override
   double get minExtent => 60.0;
@@ -794,13 +788,11 @@ class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
+    return builder(context);
   }
 
   @override
-  bool shouldRebuild(covariant _SliverHeaderDelegate oldDelegate) {
-    return child != oldDelegate.child;
-  }
+  bool shouldRebuild(covariant _FoodListHeaderDelegate oldDelegate) => true;
 }
 
 enum _SortBy {
