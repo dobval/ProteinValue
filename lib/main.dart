@@ -12,6 +12,9 @@ Future<void> main() async {
   final colorIndex = prefs.getInt(ThemeNotifier.kColorIndexKey) ?? 0;
   final themeNotifier = ThemeNotifier(colorIndex);
 
+  final controller = DBController();
+  await controller.migrateIfNeeded();
+
   runApp(
     ChangeNotifierProvider<ThemeNotifier>.value(
       value: themeNotifier,
@@ -65,16 +68,27 @@ class _AppHomePageState extends State<AppHomePage> {
   late _SortBy _sortBy;
   late bool _isAscending;
 
+  List<Region> _regions = [];
+  Region? _activeRegion;
+
   @override
   void initState() {
     super.initState();
     _sortBy = _SortBy.name;
     _isAscending = true;
-    _loadFoodItems();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    _regions = await _controller.getAllRegions();
+    _activeRegion = await _controller.getActiveRegion();
+    await _loadFoodItems();
   }
 
   Future<void> _loadFoodItems() async {
-    _foodItems = await _controller.fetchFoodItems();
+    if (_activeRegion == null) return;
+    _foodItems = await _controller.fetchFoodItems(
+        regionSanitized: _activeRegion!.sanitizedName);
     _sortFoodItems();
     setState(() {});
   }
@@ -95,43 +109,7 @@ class _AppHomePageState extends State<AppHomePage> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-              ),
-              child: const Text('Menu'),
-            ),
-            ListTile(
-              title: const Text('Food List'),
-              onTap: () {
-                if (_selectedIndex != 0) {
-                  setState(() {
-                    _selectedIndex = 0;
-                  });
-                }
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Rankings'),
-              onTap: () {
-                if (_selectedIndex != 1) {
-                  setState(() {
-                    _selectedIndex = 1;
-                  });
-                  Navigator.pop(context);
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(),
       body: _selectedIndex == 0
           ? _buildFoodItemList()
           : Column(
@@ -185,6 +163,144 @@ class _AppHomePageState extends State<AppHomePage> {
               },
             ),
     );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
+            child: const Text('Menu'),
+          ),
+          ListTile(
+            title: const Text('Food List'),
+            onTap: () {
+              if (_selectedIndex != 0) {
+                setState(() {
+                  _selectedIndex = 0;
+                });
+              }
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Rankings'),
+            onTap: () {
+              if (_selectedIndex != 1) {
+                setState(() {
+                  _selectedIndex = 1;
+                });
+                Navigator.pop(context);
+              } else {
+                Navigator.pop(context);
+              }
+            },
+          ),
+          const Divider(),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Region',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _activeRegion?.displayName ?? 'DefaultRegion',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: DropdownButton<Region>(
+              value: _regions.isEmpty
+                  ? null
+                  : _regions.firstWhere(
+                      (r) => r.sanitizedName == _activeRegion?.sanitizedName,
+                      orElse: () => _regions.first,
+                    ),
+              isExpanded: true,
+              underline: const SizedBox(),
+              items: _regions.map((region) {
+                return DropdownMenuItem(
+                  value: region,
+                  child: Text(region.displayName),
+                );
+              }).toList(),
+              onChanged: (Region? newRegion) {
+                if (newRegion != null) {
+                  _onRegionChanged(newRegion);
+                }
+              },
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: const Text('Create Region'),
+            onTap: () {
+              Navigator.pop(context);
+              _showCreateRegionDialog();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Rename Region'),
+            onTap: () {
+              Navigator.pop(context);
+              _showRenameRegionDialog();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: const Text('Delete Region'),
+            onTap: () {
+              Navigator.pop(context);
+              _showDeleteRegionDialog();
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.download),
+            title: const Text('Import Region'),
+            onTap: () {
+              Navigator.pop(context);
+              _showImportDialog();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.upload),
+            title: const Text('Export Region'),
+            onTap: () {
+              Navigator.pop(context);
+              _showExportRegionDialog();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _onRegionChanged(Region region) async {
+    await _controller.setActiveRegion(region.sanitizedName);
+    _activeRegion = region;
+    await _loadFoodItems();
   }
 
   Widget _buildFoodItemList() {
@@ -359,7 +475,8 @@ class _AppHomePageState extends State<AppHomePage> {
   }
 
   Future<void> _deleteFoodItem(FoodItem foodItem) async {
-    await _controller.removeFoodItem(foodItem.name);
+    await _controller.removeFoodItem(foodItem.name,
+        regionSanitized: _activeRegion?.sanitizedName);
     await _loadFoodItems();
   }
 
@@ -424,6 +541,255 @@ class _AppHomePageState extends State<AppHomePage> {
       }
       _sortFoodItems();
     });
+  }
+
+  void _showCreateRegionDialog() {
+    final textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Create Region'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(
+              labelText: 'Region name',
+              hintText: 'e.g. Berlin',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final name = textController.text.trim();
+                if (name.isEmpty) {
+                  _showSnackBar('Region name cannot be empty');
+                  return;
+                }
+                try {
+                  final exists = _regions.any(
+                      (r) => r.displayName.toLowerCase() == name.toLowerCase());
+                  if (exists) {
+                    _showSnackBar('Region already exists');
+                    return;
+                  }
+                  final region = await _controller.createRegion(name);
+                  await _controller.setActiveRegion(region.sanitizedName);
+                  await _loadData();
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                } catch (e) {
+                  _showSnackBar(e.toString());
+                }
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showRenameRegionDialog() {
+    if (_activeRegion == null) return;
+    final textController =
+        TextEditingController(text: _activeRegion!.displayName);
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Rename Region'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(
+              labelText: 'New name',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final name = textController.text.trim();
+                if (name.isEmpty) {
+                  _showSnackBar('Region name cannot be empty');
+                  return;
+                }
+                try {
+                  final exists = _regions.any((r) =>
+                      r.displayName.toLowerCase() == name.toLowerCase() &&
+                      r.sanitizedName != _activeRegion!.sanitizedName);
+                  if (exists) {
+                    _showSnackBar('Region already exists');
+                    return;
+                  }
+                  await _controller.renameRegion(
+                      _activeRegion!.displayName, name);
+                  await _loadData();
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                } catch (e) {
+                  _showSnackBar(e.toString());
+                }
+              },
+              child: const Text('Rename'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteRegionDialog() {
+    if (_activeRegion == null) return;
+    final sanitized = _activeRegion!.sanitizedName;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Delete Region?'),
+          content: FutureBuilder<int>(
+            future: _controller.getRegionFoodCount(sanitized),
+            builder: (context, snapshot) {
+              final count = snapshot.data ?? 0;
+              return Text(
+                'This will permanently delete all $count food items '
+                'in "${_activeRegion!.displayName}".',
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                _showDeleteRegionSecondConfirmation(sanitized, ctx);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteRegionSecondConfirmation(String sanitized, BuildContext ctx) {
+    showDialog(
+      context: context,
+      builder: (BuildContext innerCtx) {
+        return Transform.translate(
+          offset: const Offset(50, 50),
+          child: AlertDialog(
+            title: const Text('Are you sure?'),
+            content: const Text('This cannot be undone.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(innerCtx).pop(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                onPressed: () async {
+                  try {
+                    await _controller.deleteRegion(sanitized);
+                    await _loadData();
+                    if (innerCtx.mounted) Navigator.of(innerCtx).pop();
+                    _showSnackBar('Region deleted');
+                  } catch (e) {
+                    _showSnackBar(e.toString());
+                  }
+                },
+                child: const Text('Delete Forever'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showExportRegionDialog() async {
+    if (_activeRegion == null) return;
+    final region = _activeRegion!;
+    final timestamp =
+        DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+    final fileName = 'proteinvalue_${region.sanitizedName}_$timestamp.sql';
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    ).then((_) {});
+
+    try {
+      final sql = await _controller.exportRegionSQL(region.sanitizedName);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      await _controller.exportAndShare(sql, fileName);
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      _showSnackBar('Export failed: $e');
+    }
+  }
+
+  void _showImportDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    ).then((_) {});
+
+    try {
+      final result = await _controller.pickAndImportSQL();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      if (result != null) {
+        await _loadData();
+        _showSnackBar('Imported region: ${result.displayName}');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      _showImportErrorDialog(e.toString());
+    }
+  }
+
+  void _showImportErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Import Failed'),
+          content: SingleChildScrollView(
+            child: SelectableText(message),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 }
 

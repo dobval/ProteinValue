@@ -7,6 +7,10 @@ class FoodItem {
   static const String kColGrams = 'grams';
   static const String kDatabaseName = 'foodItems.db';
 
+  static const String kDefaultRegionDisplay = 'DefaultRegion';
+  static const String kDefaultRegionSanitized = 'defaultregion';
+  static const String kActiveRegionKey = 'active_region';
+
   final String name;
   final double price;
   final int protein100g;
@@ -61,6 +65,13 @@ class FoodItem {
       kColGrams: grams,
     };
   }
+
+  String toInsertSQL(String tableName) {
+    return "INSERT OR REPLACE INTO $tableName ($kColName, $kColPrice, $kColProtein, $kColKcal, $kColGrams) "
+        "VALUES ('${_escapeSql(name)}', $price, $protein100g, $kcal100g, $grams);";
+  }
+
+  String _escapeSql(String s) => s.replaceAll("'", "''");
 
   factory FoodItem.fromMap(Map<String, dynamic> map) {
     return FoodItem(
