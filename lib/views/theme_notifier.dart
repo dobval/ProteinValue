@@ -16,7 +16,7 @@ class ThemeNotifier with ChangeNotifier {
     Colors.cyan,
     Colors.teal,
     Colors.green,
-    Colors.lightGreen, //9
+    Colors.lightGreen,
     Colors.lime,
     Colors.yellow,
     Colors.amber,
@@ -27,13 +27,11 @@ class ThemeNotifier with ChangeNotifier {
     Colors.blueGrey,
   ];
 
-  // Method to cycle through colors
-  void _changeColorScheme() {
+  void _changeColorSchemeCycleThrough() {
     _colorIndex = (_colorIndex + 1) % kColorCount;
-    notifyListeners(); // Notify listeners of change
+    notifyListeners();
   }
 
-  // Get the current color scheme
   ThemeData get currentTheme {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
@@ -44,6 +42,6 @@ class ThemeNotifier with ChangeNotifier {
 
   // Method to expose for changing color
   void changeColor() {
-    _changeColorScheme();
+    _changeColorSchemeCycleThrough();
   }
 }

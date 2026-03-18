@@ -56,13 +56,13 @@ class _AppHomePageState extends State<AppHomePage> {
   int _selectedIndex = 0;
   Rankings _selectedRanking = Rankings.cheapProteinRich;
 
-  late SortBy _sortBy;
+  late _SortBy _sortBy;
   late bool _isAscending;
 
   @override
   void initState() {
     super.initState();
-    _sortBy = SortBy.name;
+    _sortBy = _SortBy.name;
     _isAscending = true;
     _loadFoodItems();
   }
@@ -199,20 +199,20 @@ class _AppHomePageState extends State<AppHomePage> {
                       children: [
                         Expanded(
                             flex: 2,
-                            child: _buildHeaderCell('Name', SortBy.name)),
+                            child: _buildHeaderCell('Name', _SortBy.name)),
                         Expanded(
                             flex: 1,
-                            child: _buildHeaderCell('Price', SortBy.price)),
+                            child: _buildHeaderCell('Price', _SortBy.price)),
                         Expanded(
                             flex: 1,
                             child: _buildHeaderCell(
-                                'Protein/100g', SortBy.protein)),
+                                'Protein/100g', _SortBy.protein)),
                         Expanded(
                             flex: 1,
-                            child: _buildHeaderCell('Kcal/100g', SortBy.kcal)),
+                            child: _buildHeaderCell('Kcal/100g', _SortBy.kcal)),
                         Expanded(
                             flex: 1,
-                            child: _buildHeaderCell('Grams', SortBy.grams)),
+                            child: _buildHeaderCell('Grams', _SortBy.grams)),
                       ],
                     ),
                     const Divider(),
@@ -361,22 +361,22 @@ class _AppHomePageState extends State<AppHomePage> {
     _foodItems.sort((a, b) {
       int comparison;
       switch (_sortBy) {
-        case SortBy.name:
+        case _SortBy.name:
           comparison = a.name.compareTo(b.name);
-        case SortBy.price:
+        case _SortBy.price:
           comparison = a.price.compareTo(b.price);
-        case SortBy.protein:
+        case _SortBy.protein:
           comparison = a.protein100g.compareTo(b.protein100g);
-        case SortBy.kcal:
+        case _SortBy.kcal:
           comparison = a.kcal100g.compareTo(b.kcal100g);
-        case SortBy.grams:
+        case _SortBy.grams:
           comparison = a.grams.compareTo(b.grams);
       }
       return _isAscending ? comparison : -comparison;
     });
   }
 
-  Widget _buildHeaderCell(String title, SortBy sortBy) {
+  Widget _buildHeaderCell(String title, _SortBy sortBy) {
     return GestureDetector(
       onTap: () => _onHeaderTap(sortBy),
       child: Container(
@@ -408,7 +408,7 @@ class _AppHomePageState extends State<AppHomePage> {
     );
   }
 
-  void _onHeaderTap(SortBy sortBy) {
+  void _onHeaderTap(_SortBy sortBy) {
     setState(() {
       if (_sortBy == sortBy) {
         _isAscending = !_isAscending;
@@ -444,7 +444,7 @@ class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-enum SortBy {
+enum _SortBy {
   name,
   price,
   protein,
