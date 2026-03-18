@@ -1,5 +1,4 @@
 class FoodItem {
-  static const String kTableName = 'foodItems';
   static const String kColName = 'name';
   static const String kColPrice = 'price';
   static const String kColProtein = 'protein100g';
@@ -66,12 +65,10 @@ class FoodItem {
     };
   }
 
-  String toInsertSQL(String tableName) {
+  String toInsertSQL(String tableName, String Function(String) escapeSql) {
     return "INSERT OR REPLACE INTO $tableName ($kColName, $kColPrice, $kColProtein, $kColKcal, $kColGrams) "
-        "VALUES ('${_escapeSql(name)}', $price, $protein100g, $kcal100g, $grams);";
+        "VALUES ('${escapeSql(name)}', $price, $protein100g, $kcal100g, $grams);";
   }
-
-  String _escapeSql(String s) => s.replaceAll("'", "''");
 
   factory FoodItem.fromMap(Map<String, dynamic> map) {
     return FoodItem(

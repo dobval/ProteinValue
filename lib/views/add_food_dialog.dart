@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proteinvalue/models/food_item.dart';
-import '../controllers/db_helper.dart';
+import '../controllers/db_controller.dart';
 
 class AddFoodDialog extends StatefulWidget {
   final DBController controller;
@@ -123,7 +123,6 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
 
     try {
       await widget.controller.addFoodItem(foodItem);
-      await widget.controller.fetchFoodItems();
 
       if (!mounted) return;
       Navigator.of(context).pop();

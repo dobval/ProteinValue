@@ -79,8 +79,6 @@ class DBController {
     await db.execute(
       'CREATE TABLE settings(key TEXT PRIMARY KEY, value TEXT)',
     );
-    final List<Map<String, dynamic>> oldItems =
-        await db.query(FoodItem.kTableName);
     final tableName = _foodTableName(FoodItem.kDefaultRegionSanitized);
     await db.execute(
       'CREATE TABLE $tableName('
@@ -90,10 +88,18 @@ class DBController {
       '${FoodItem.kColKcal} INT,'
       '${FoodItem.kColGrams} INT)',
     );
-    for (final item in oldItems) {
-      await db.insert(tableName, item,
-          conflictAlgorithm: ConflictAlgorithm.replace);
+
+    final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='foodItems'");
+    if (tables.isNotEmpty) {
+      final List<Map<String, dynamic>> oldItems = await db.query('foodItems');
+      for (final item in oldItems) {
+        await db.insert(tableName, item,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      await db.execute('DROP TABLE foodItems');
     }
+
     await db.execute(
       "INSERT INTO regions (display_name, sanitized_name, created_at) "
       "VALUES ('${FoodItem.kDefaultRegionDisplay}', '${FoodItem.kDefaultRegionSanitized}', "
@@ -102,8 +108,6 @@ class DBController {
     await db.execute(
       "INSERT INTO settings (key, value) VALUES ('${FoodItem.kActiveRegionKey}', '${FoodItem.kDefaultRegionSanitized}')",
     );
-    await db.execute('DROP TABLE ${FoodItem.kTableName}');
-    await db.execute('PRAGMA user_version = 2');
   }
 
   String _foodTableName(String sanitizedName) => 'foodItems_$sanitizedName';
@@ -223,9 +227,6 @@ class DBController {
     if (regions.length <= 1) {
       throw ArgumentError('Cannot delete the last region');
     }
-    if (sanitizedName == FoodItem.kDefaultRegionSanitized) {
-      throw ArgumentError('Cannot delete the default region');
-    }
     await db.execute('DROP TABLE ${_foodTableName(sanitizedName)}');
     await db.delete(
       'regions',
@@ -336,7 +337,7 @@ class DBController {
         await db.query(_foodTableName(sanitizedName));
     for (final item in items) {
       final f = FoodItem.fromMap(item);
-      buf.writeln(f.toInsertSQL(_foodTableName(sanitizedName)));
+      buf.writeln(f.toInsertSQL(_foodTableName(sanitizedName), _escapeSql));
     }
     return buf.toString();
   }
@@ -382,9 +383,9 @@ class DBController {
       final rawTs = exportedLine.substring('-- Exported:'.length).trim();
       final isoTs = DateTime.tryParse(rawTs);
       if (isoTs != null) {
-        exportTimestamp =
-            '${isoTs.year}${_pad2(isoTs.month)}${_pad2(isoTs.day)}_'
-            '${_pad2(isoTs.hour)}${_pad2(isoTs.minute)}${_pad2(isoTs.second)}';
+        String pad2(int n) => n.toString().padLeft(2, '0');
+        exportTimestamp = '${isoTs.year}${pad2(isoTs.month)}${pad2(isoTs.day)}_'
+            '${pad2(isoTs.hour)}${pad2(isoTs.minute)}${pad2(isoTs.second)}';
       }
     }
 
@@ -414,68 +415,29 @@ class DBController {
     }
     displayName = resolvedDisplayName;
 
-    final debugInfo = StringBuffer();
-    debugInfo.writeln('displayName: "$displayName"');
-    debugInfo.writeln('sanitizedName: "$sanitizedName"');
-
     final createdAt = _extractCreatedAtFromSql(sqlContent, originalSanitized);
-    debugInfo.writeln('createdAt: "$createdAt"');
-
     final foodItems = _extractFoodItemsFromSql(sqlContent, originalSanitized);
-    debugInfo.writeln('foodItems found: ${foodItems.length}');
 
-    final errors = <String>[];
-    int foodInserted = 0;
+    await db.insert('regions', {
+      'display_name': displayName,
+      'sanitized_name': sanitizedName,
+      'created_at': createdAt,
+    });
 
-    try {
-      await db.insert('regions', {
-        'display_name': displayName,
-        'sanitized_name': sanitizedName,
-        'created_at': createdAt,
-      });
-    } catch (e) {
-      errors.add('regions insert: $e');
-    }
-
-    try {
-      await db.execute(
-          'CREATE TABLE IF NOT EXISTS ${_foodTableName(sanitizedName)}('
-          '${FoodItem.kColName} TEXT PRIMARY KEY,'
-          '${FoodItem.kColPrice} DOUBLE,'
-          '${FoodItem.kColProtein} INT,'
-          '${FoodItem.kColKcal} INT,'
-          '${FoodItem.kColGrams} INT)');
-    } catch (e) {
-      errors.add('create table: $e');
-    }
+    await db
+        .execute('CREATE TABLE IF NOT EXISTS ${_foodTableName(sanitizedName)}('
+            '${FoodItem.kColName} TEXT PRIMARY KEY,'
+            '${FoodItem.kColPrice} DOUBLE,'
+            '${FoodItem.kColProtein} INT,'
+            '${FoodItem.kColKcal} INT,'
+            '${FoodItem.kColGrams} INT)');
 
     for (final item in foodItems) {
-      try {
-        await db.insert(
-          _foodTableName(sanitizedName),
-          item.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-        foodInserted++;
-      } catch (e) {
-        errors.add('food insert (${item.name}): $e');
-      }
-    }
-
-    debugInfo.writeln('errors: ${errors.length}');
-    debugInfo.writeln('foodItems inserted: $foodInserted');
-    if (errors.isNotEmpty) {
-      debugInfo.writeln('Error details: ${errors.join('; ')}');
-    }
-
-    final check = await db.query(
-      'regions',
-      where: 'sanitized_name = ?',
-      whereArgs: [sanitizedName],
-    );
-    debugInfo.writeln('post-verify rows: ${check.length}');
-    if (check.isEmpty) {
-      throw Exception('Verification failed\n\n${debugInfo.toString()}');
+      await db.insert(
+        _foodTableName(sanitizedName),
+        item.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
 
     return displayName;
@@ -592,8 +554,6 @@ class DBController {
     }
     return result;
   }
-
-  String _pad2(int n) => n.toString().padLeft(2, '0');
 
   Future<Region?> pickAndImportSQL() async {
     const typeGroup = XTypeGroup(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:proteinvalue/controllers/db_helper.dart';
+import 'package:proteinvalue/controllers/db_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/food_item.dart';
@@ -38,18 +38,14 @@ class _ProteinValueAppState extends State<ProteinValueApp> {
         title: 'Protein Value Flutter',
         theme: themeNotifier.currentTheme,
         themeMode: ThemeMode.system,
-        home: const AppHomePage(
-          title: 'Home Page',
-        ),
+        home: const AppHomePage(),
       );
     });
   }
 }
 
 class AppHomePage extends StatefulWidget {
-  const AppHomePage({super.key, required this.title});
-
-  final String title;
+  const AppHomePage({super.key});
 
   @override
   State<AppHomePage> createState() => _AppHomePageState();
@@ -213,15 +209,6 @@ class _AppHomePageState extends State<AppHomePage> {
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _activeRegion?.displayName ?? 'DefaultRegion',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ],
