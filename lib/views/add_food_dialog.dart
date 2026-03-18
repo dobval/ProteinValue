@@ -6,9 +6,9 @@ class AddFoodDialog extends StatelessWidget {
   final DBController controller;
 
   const AddFoodDialog({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +63,15 @@ class AddFoodDialog extends StatelessWidget {
             // Get input values and handle parsing safely
             final String name = nameController.text.trim();
             final double price = double.tryParse(priceController.text) ?? 0;
-            final int protein100g = int.tryParse(protein100gController.text) ?? 0;
+            final int protein100g =
+                int.tryParse(protein100gController.text) ?? 0;
             final int kcal100g = int.tryParse(kcal100gController.text) ?? 0;
             final int grams = int.tryParse(gramsController.text) ?? 0;
 
             // Ensure that name is not empty
             if (name.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Name cannot be empty')),
+                const SnackBar(content: Text('Name cannot be empty')),
               );
               return;
             }
@@ -87,7 +88,8 @@ class AddFoodDialog extends StatelessWidget {
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (context) => Center(child: CircularProgressIndicator()),
+              builder: (context) =>
+                  const Center(child: CircularProgressIndicator()),
             );
 
             try {
@@ -96,11 +98,13 @@ class AddFoodDialog extends StatelessWidget {
               await controller.fetchFoodItems();
 
               // Close the loading indicator and dialog, returning 'true' as the result
+              if (!context.mounted) return;
               Navigator.of(context).pop(); // Close the loading indicator
-              Navigator.of(context).pop(true); // Close the AddFoodDialog with result 'true'
-
+              Navigator.of(context)
+                  .pop(true); // Close the AddFoodDialog with result 'true'
             } catch (e) {
               // Handle errors
+              if (!context.mounted) return;
               Navigator.of(context).pop(); // Close the loading indicator
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Error adding food item: $e')),

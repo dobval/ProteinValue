@@ -23,21 +23,18 @@ class ProteinValueApp extends StatefulWidget {
 }
 
 class _ProteinValueAppState extends State<ProteinValueApp> {
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeNotifier>(
-      builder: (context, themeNotifier, child) {
-        return MaterialApp(
-          title: 'Protein Value Flutter',
-          theme: themeNotifier.currentTheme,
-          themeMode: ThemeMode.system,
-          home: AppHomePage(
-            title: 'Home Page',
-          ),
-        );
-      }
-    );
+    return Consumer<ThemeNotifier>(builder: (context, themeNotifier, child) {
+      return MaterialApp(
+        title: 'Protein Value Flutter',
+        theme: themeNotifier.currentTheme,
+        themeMode: ThemeMode.system,
+        home: const AppHomePage(
+          title: 'Home Page',
+        ),
+      );
+    });
   }
 }
 
@@ -73,7 +70,6 @@ class _AppHomePageState extends State<AppHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -176,7 +172,7 @@ class _AppHomePageState extends State<AppHomePage> {
                     return AlertDialog(
                       title: const Text('Ranking Formula'),
                       content: Text(_rankingExplanation),
-                        actions: [
+                      actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
                           child: const Text('Close'),
@@ -280,9 +276,9 @@ class _AppHomePageState extends State<AppHomePage> {
     List<FoodItem> sortedItems = List.from(_foodItems);
     sortedItems.sort((a, b) {
       double ratioA =
-          a.price > 0 ? (a.protein100g * a.grams) / (a.price*100) : 0;
+          a.price > 0 ? (a.protein100g * a.grams) / (a.price * 100) : 0;
       double ratioB =
-          b.price > 0 ? (b.protein100g * b.grams) / (b.price*100) : 0;
+          b.price > 0 ? (b.protein100g * b.grams) / (b.price * 100) : 0;
       return ratioB.compareTo(ratioA); // Descending order
     });
 
@@ -292,10 +288,8 @@ class _AppHomePageState extends State<AppHomePage> {
   List<FoodItem> _getTop10ItemsByProteinKcalRatio() {
     List<FoodItem> sortedItems = List.from(_foodItems);
     sortedItems.sort((a, b) {
-      double ratioA =
-      a.price > 0 ? (a.protein100g) / a.kcal100g : 0;
-      double ratioB =
-      b.price > 0 ? (b.protein100g) / b.kcal100g : 0;
+      double ratioA = a.price > 0 ? (a.protein100g) / a.kcal100g : 0;
+      double ratioB = b.price > 0 ? (b.protein100g) / b.kcal100g : 0;
       return ratioB.compareTo(ratioA); // Descending order
     });
 
@@ -305,10 +299,12 @@ class _AppHomePageState extends State<AppHomePage> {
   List<FoodItem> _getTop10ItemsByProteinPriceKcalRatio() {
     List<FoodItem> sortedItems = List.from(_foodItems);
     sortedItems.sort((a, b) {
-      double ratioA =
-      a.price > 0 ? (a.protein100g * a.grams) / (a.price*100*a.kcal100g) : 0;
-      double ratioB =
-      b.price > 0 ? (b.protein100g * b.grams) / (b.price*100*b.kcal100g) : 0;
+      double ratioA = a.price > 0
+          ? (a.protein100g * a.grams) / (a.price * 100 * a.kcal100g)
+          : 0;
+      double ratioB = b.price > 0
+          ? (b.protein100g * b.grams) / (b.price * 100 * b.kcal100g)
+          : 0;
       return ratioB.compareTo(ratioA); // Descending order
     });
 
@@ -319,9 +315,9 @@ class _AppHomePageState extends State<AppHomePage> {
     List<FoodItem> sortedItems = List.from(_foodItems);
     sortedItems.sort((a, b) {
       double ratioA =
-      a.price > 0 ? (a.kcal100g * a.grams) / (a.price * 100) : 0;
+          a.price > 0 ? (a.kcal100g * a.grams) / (a.price * 100) : 0;
       double ratioB =
-      b.price > 0 ? (b.kcal100g * b.grams) / (b.price * 100) : 0;
+          b.price > 0 ? (b.kcal100g * b.grams) / (b.price * 100) : 0;
       return ratioB.compareTo(ratioA); // Descending order
     });
 
@@ -345,7 +341,8 @@ class _AppHomePageState extends State<AppHomePage> {
         top10Items = _getTop10ItemsByKcalPriceRatio();
         break;
       default:
-        top10Items = _getTop10ItemsByProteinPriceRatio(); // default to 'Cheap Protein-Rich'
+        top10Items =
+            _getTop10ItemsByProteinPriceRatio(); // default to 'Cheap Protein-Rich'
     }
 
     return ListView.builder(
@@ -357,17 +354,16 @@ class _AppHomePageState extends State<AppHomePage> {
         switch (_selectedRanking) {
           case 'Cheap Protein-Rich':
             ratio = item.price > 0
-                ? (item.protein100g * item.grams) / (item.price*100)
+                ? (item.protein100g * item.grams) / (item.price * 100)
                 : 0;
             break;
           case 'Lean Protein-Rich':
-            ratio = item.kcal100g > 0
-                ? (item.protein100g) / item.kcal100g
-                : 0;
+            ratio = item.kcal100g > 0 ? (item.protein100g) / item.kcal100g : 0;
             break;
           case 'Cheap Lean Protein-Rich':
             ratio = (item.price > 0 && item.kcal100g > 0)
-                ? (item.protein100g * item.grams) / (item.price*100*item.kcal100g)
+                ? (item.protein100g * item.grams) /
+                    (item.price * 100 * item.kcal100g)
                 : 0;
             break;
           case 'Cheap High-Calorie':
@@ -390,13 +386,16 @@ class _AppHomePageState extends State<AppHomePage> {
   void _updateRankingExplanation() {
     switch (_selectedRanking) {
       case 'Cheap Protein-Rich':
-        _rankingExplanation = 'Calculated as Protein/Price. Example: (11*5)/1,49 = 36,92g for 1€ (ja! Skyr Natur 500g 1,49€; 11g Protein per 100g).';
+        _rankingExplanation =
+            'Calculated as Protein/Price. Example: (11*5)/1,49 = 36,92g for 1€ (ja! Skyr Natur 500g 1,49€; 11g Protein per 100g).';
         break;
       case 'Lean Protein-Rich':
-        _rankingExplanation = 'Calculated as Protein/Kcal. Example: Chicken Breast';
+        _rankingExplanation =
+            'Calculated as Protein/Kcal. Example: Chicken Breast';
         break;
       case 'Cheap Lean Protein-Rich':
-        _rankingExplanation = 'Calculated as (Protein/Price)/Kcal. Example: Low-fat Cheese';
+        _rankingExplanation =
+            'Calculated as (Protein/Price)/Kcal. Example: Low-fat Cheese';
         break;
       case 'Cheap High-Calorie':
         _rankingExplanation = 'Calculated as Kcal/Price. Examples: Flour, Oil';
