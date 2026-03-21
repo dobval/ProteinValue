@@ -314,21 +314,29 @@ class _AppHomePageState extends State<AppHomePage> {
                       children: [
                         Expanded(
                             flex: 2,
-                            child: Text(foodItem.name, softWrap: true)),
+                            child: Text(foodItem.name,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis)),
                         Expanded(
                             flex: 1,
-                            child: Text('${foodItem.price}', softWrap: true)),
+                            child: Text('${foodItem.price}',
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis)),
                         Expanded(
                             flex: 1,
                             child: Text('${foodItem.protein100g}',
-                                softWrap: true)),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis)),
                         Expanded(
                             flex: 1,
-                            child:
-                                Text('${foodItem.kcal100g}', softWrap: true)),
+                            child: Text('${foodItem.kcal100g}',
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis)),
                         Expanded(
                             flex: 1,
-                            child: Text('${foodItem.grams}', softWrap: true)),
+                            child: Text('${foodItem.grams}',
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ),
@@ -462,6 +470,7 @@ class _AppHomePageState extends State<AppHomePage> {
               child: Text(
                 title,
                 softWrap: true,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onSurface,
