@@ -88,7 +88,7 @@ void main() {
     });
   });
 
-  group('DBController._escapeSql (via FoodItem.toInsertSQL)', () {
+  group('FoodItem.toInsertSQL escaping', () {
     test('escapes single quotes in SQL output', () {
       final food = FoodItem.create(
         name: "Test's Food",

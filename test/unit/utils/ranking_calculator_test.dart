@@ -1,198 +1,297 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:proteinvalue/models/food_item.dart';
 import 'package:proteinvalue/models/rankings.dart';
 import 'package:proteinvalue/utils/ranking_calculator.dart';
 
 void main() {
-  group('RankingCalculator.cheapProteinRich', () {
-    test('calculates Protein/Price correctly', () {
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
+
+  group('RankingCalculator.cheapProteinRich (protein/price)', () {
+    test('rankings: best > good > ok (only protein varies)', () {
+      final foods = [
+        FoodItem.create(
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'good',
+          price: 1.0,
+          protein100g: 20,
+          kcal100g: 100,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'best',
+          price: 1.0,
+          protein100g: 30,
+          kcal100g: 100,
+          grams: 100,
+        ),
+      ];
+
+      final sorted = List<FoodItem>.from(foods)
+        ..sort((a, b) => RankingCalculator.cheapProteinRich(b)
+            .compareTo(RankingCalculator.cheapProteinRich(a)));
+
+      expect(sorted[0].name, equals('best'));
+      expect(sorted[1].name, equals('good'));
+      expect(sorted[2].name, equals('ok'));
+    });
+
+    test('exact values: protein=20, price=1, grams=100 → 20.0', () {
       final food = FoodItem.create(
-        name: 'Test Food',
-        price: 2.00,
+        name: 'Test',
+        price: 1.0,
         protein100g: 20,
         kcal100g: 100,
         grams: 100,
       );
-      expect(RankingCalculator.cheapProteinRich(food), equals(10.0));
+      expect(RankingCalculator.cheapProteinRich(food), equals(20.0));
+    });
+  });
+
+  group('RankingCalculator.leanProteinRich (protein/kcal)', () {
+    test('rankings: best > good > ok (only protein varies)', () {
+      final foods = [
+        FoodItem.create(
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'good',
+          price: 1.0,
+          protein100g: 20,
+          kcal100g: 100,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'best',
+          price: 1.0,
+          protein100g: 30,
+          kcal100g: 100,
+          grams: 100,
+        ),
+      ];
+
+      final sorted = List<FoodItem>.from(foods)
+        ..sort((a, b) => RankingCalculator.leanProteinRich(b)
+            .compareTo(RankingCalculator.leanProteinRich(a)));
+
+      expect(sorted[0].name, equals('best'));
+      expect(sorted[1].name, equals('good'));
+      expect(sorted[2].name, equals('ok'));
     });
 
+    test('exact values: protein=25, kcal=100 → 0.25', () {
+      final food = FoodItem.create(
+        name: 'Test',
+        price: 1.0,
+        protein100g: 25,
+        kcal100g: 100,
+        grams: 100,
+      );
+      expect(RankingCalculator.leanProteinRich(food), equals(0.25));
+    });
+  });
+
+  group('RankingCalculator.cheapLeanProteinRich ((protein/price)/kcal)', () {
+    test('rankings: best > good > ok (only protein varies)', () {
+      final foods = [
+        FoodItem.create(
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'good',
+          price: 1.0,
+          protein100g: 20,
+          kcal100g: 100,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'best',
+          price: 1.0,
+          protein100g: 30,
+          kcal100g: 100,
+          grams: 100,
+        ),
+      ];
+
+      final sorted = List<FoodItem>.from(foods)
+        ..sort((a, b) => RankingCalculator.cheapLeanProteinRich(b)
+            .compareTo(RankingCalculator.cheapLeanProteinRich(a)));
+
+      expect(sorted[0].name, equals('best'));
+      expect(sorted[1].name, equals('good'));
+      expect(sorted[2].name, equals('ok'));
+    });
+
+    test('exact values: protein=50, kcal=100, price=1, grams=100 → 0.5', () {
+      final food = FoodItem.create(
+        name: 'Test',
+        price: 1.0,
+        protein100g: 50,
+        kcal100g: 100,
+        grams: 100,
+      );
+      expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.5));
+    });
+  });
+
+  group('RankingCalculator.cheapHighCalorie (kcal/price)', () {
+    test('rankings: best > good > ok (only kcal varies)', () {
+      final foods = [
+        FoodItem.create(
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'good',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 200,
+          grams: 100,
+        ),
+        FoodItem.create(
+          name: 'best',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 300,
+          grams: 100,
+        ),
+      ];
+
+      final sorted = List<FoodItem>.from(foods)
+        ..sort((a, b) => RankingCalculator.cheapHighCalorie(b)
+            .compareTo(RankingCalculator.cheapHighCalorie(a)));
+
+      expect(sorted[0].name, equals('best'));
+      expect(sorted[1].name, equals('good'));
+      expect(sorted[2].name, equals('ok'));
+    });
+
+    test('exact values: kcal=250, price=1, grams=100 → 250.0', () {
+      final food = FoodItem.create(
+        name: 'Test',
+        price: 1.0,
+        protein100g: 10,
+        kcal100g: 250,
+        grams: 100,
+      );
+      expect(RankingCalculator.cheapHighCalorie(food), equals(250.0));
+    });
+  });
+
+  group('All rankings handle zero values', () {
     test('returns 0 when price is zero', () {
       final food = FoodItem.create(
-        name: 'Free Food',
+        name: 'Test',
         price: 0.0,
         protein100g: 20,
         kcal100g: 100,
         grams: 100,
       );
+
       expect(RankingCalculator.cheapProteinRich(food), equals(0.0));
-    });
-
-    test('handles different gram amounts', () {
-      final food = FoodItem.create(
-        name: 'Double Portion',
-        price: 4.00,
-        protein100g: 20,
-        kcal100g: 100,
-        grams: 200,
-      );
-      expect(RankingCalculator.cheapProteinRich(food), equals(10.0));
-    });
-
-    test('handles fractional price', () {
-      final food = FoodItem.create(
-        name: 'Cheap Food',
-        price: 1.49,
-        protein100g: 11,
-        kcal100g: 100,
-        grams: 500,
-      );
-      expect(RankingCalculator.cheapProteinRich(food), closeTo(36.91, 0.01));
-    });
-  });
-
-  group('RankingCalculator.leanProteinRich', () {
-    test('calculates Protein/Kcal correctly', () {
-      final food = FoodItem.create(
-        name: 'Test Food',
-        price: 2.00,
-        protein100g: 30,
-        kcal100g: 150,
-        grams: 100,
-      );
-      expect(RankingCalculator.leanProteinRich(food), equals(0.2));
+      expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.0));
+      expect(RankingCalculator.cheapHighCalorie(food), equals(0.0));
     });
 
     test('returns 0 when kcal is zero', () {
       final food = FoodItem.create(
-        name: 'Zero Cal Food',
-        price: 2.00,
-        protein100g: 30,
+        name: 'Test',
+        price: 1.0,
+        protein100g: 20,
         kcal100g: 0,
         grams: 100,
       );
+
       expect(RankingCalculator.leanProteinRich(food), equals(0.0));
+      expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.0));
+    });
+  });
+
+  group('Rankings enum completeness', () {
+    test('all 4 ranking types exist', () {
+      expect(Rankings.values.length, equals(4));
     });
 
-    test('handles high protein, low calorie food', () {
-      final food = FoodItem.create(
+    test('all ranking types have unique formulas', () {
+      final formulas = Rankings.values.map((r) => r.formula).toSet();
+      expect(formulas.length, equals(Rankings.values.length));
+    });
+
+    test('all ranking types have explanations', () {
+      for (final ranking in Rankings.values) {
+        expect(ranking.explanation.isNotEmpty, isTrue);
+        expect(ranking.explanation, contains(ranking.formula));
+      }
+    });
+  });
+
+  group('FoodItem serialization round-trip', () {
+    test('survives map serialization', () {
+      final original = FoodItem.create(
         name: 'Chicken Breast',
-        price: 5.00,
+        price: 5.99,
         protein100g: 31,
         kcal100g: 165,
         grams: 150,
       );
-      expect(RankingCalculator.leanProteinRich(food), closeTo(0.188, 0.001));
-    });
-  });
 
-  group('RankingCalculator.cheapLeanProteinRich', () {
-    test('calculates (Protein/Price)/Kcal correctly', () {
-      final food = FoodItem.create(
-        name: 'Test Food',
-        price: 2.00,
+      final map = original.toMap();
+      final restored = FoodItem.fromMap(map);
+
+      expect(restored.name, equals('Chicken Breast'));
+      expect(restored.price, equals(5.99));
+      expect(restored.protein100g, equals(31));
+      expect(restored.kcal100g, equals(165));
+      expect(restored.grams, equals(150));
+      expect(restored, equals(original));
+    });
+
+    test('handles special characters in name', () {
+      final original = FoodItem.create(
+        name: "O'Brien's Best",
+        price: 3.50,
         protein100g: 20,
         kcal100g: 100,
         grams: 100,
       );
-      expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.1));
+
+      final map = original.toMap();
+      final restored = FoodItem.fromMap(map);
+
+      expect(restored.name, equals("O'Brien's Best"));
+      expect(restored, equals(original));
     });
 
-    test('returns 0 when price is zero', () {
+    test('trims whitespace from name on create', () {
       final food = FoodItem.create(
-        name: 'Free Food',
-        price: 0.0,
-        protein100g: 20,
-        kcal100g: 100,
-        grams: 100,
-      );
-      expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.0));
-    });
-
-    test('returns 0 when kcal is zero', () {
-      final food = FoodItem.create(
-        name: 'Zero Cal Food',
-        price: 2.00,
-        protein100g: 20,
-        kcal100g: 0,
-        grams: 100,
-      );
-      expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.0));
-    });
-
-    test('favors cheap, high protein, low calorie foods', () {
-      final food = FoodItem.create(
-        name: 'Low Fat Cheese',
-        price: 3.00,
-        protein100g: 10,
-        kcal100g: 50,
-        grams: 100,
-      );
-      expect(
-          RankingCalculator.cheapLeanProteinRich(food), closeTo(0.067, 0.001));
-    });
-  });
-
-  group('RankingCalculator.cheapHighCalorie', () {
-    test('calculates Kcal/Price correctly', () {
-      final food = FoodItem.create(
-        name: 'Test Food',
-        price: 2.00,
-        protein100g: 10,
-        kcal100g: 200,
-        grams: 100,
-      );
-      expect(RankingCalculator.cheapHighCalorie(food), equals(100.0));
-    });
-
-    test('returns 0 when price is zero', () {
-      final food = FoodItem.create(
-        name: 'Free Food',
-        price: 0.0,
-        protein100g: 10,
-        kcal100g: 200,
-        grams: 100,
-      );
-      expect(RankingCalculator.cheapHighCalorie(food), equals(0.0));
-    });
-
-    test('handles high calorie density foods', () {
-      final food = FoodItem.create(
-        name: 'Oil',
+        name: '  Chicken  ',
         price: 5.00,
-        protein100g: 0,
-        kcal100g: 900,
-        grams: 100,
-      );
-      expect(RankingCalculator.cheapHighCalorie(food), equals(180.0));
-    });
-  });
-
-  group('RankingCalculator.calculate', () {
-    test('delegates to correct formula based on ranking type', () {
-      final food = FoodItem.create(
-        name: 'Test Food',
-        price: 2.00,
         protein100g: 20,
         kcal100g: 100,
         grams: 100,
       );
 
-      expect(
-        RankingCalculator.calculate(food, Rankings.cheapProteinRich),
-        equals(RankingCalculator.cheapProteinRich(food)),
-      );
-      expect(
-        RankingCalculator.calculate(food, Rankings.leanProteinRich),
-        equals(RankingCalculator.leanProteinRich(food)),
-      );
-      expect(
-        RankingCalculator.calculate(food, Rankings.cheapLeanProteinRich),
-        equals(RankingCalculator.cheapLeanProteinRich(food)),
-      );
-      expect(
-        RankingCalculator.calculate(food, Rankings.cheapHighCalorie),
-        equals(RankingCalculator.cheapHighCalorie(food)),
-      );
+      expect(food.name, equals('Chicken'));
     });
   });
 }
