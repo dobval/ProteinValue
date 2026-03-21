@@ -9,7 +9,6 @@ AutoName: ProteinValue
 
 RepoType: git
 Repo: https://github.com/dobval/ProteinValue.git
-Binaries: https://github.com/dobval/ProteinValue/releases/download/v%v/ProteinValue-%v.apk
 
 Builds:
   - versionName: '0.1.0'
