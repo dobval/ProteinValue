@@ -633,7 +633,7 @@ class _AppHomePageState extends State<AppHomePage> {
       context: context,
       builder: (BuildContext innerCtx) {
         return Transform.translate(
-          offset: const Offset(50, 50),
+          offset: const Offset(0, 100),
           child: AlertDialog(
             title: const Text('Are you sure?'),
             content: const Text('This cannot be undone.'),
