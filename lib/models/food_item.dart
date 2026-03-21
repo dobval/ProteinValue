@@ -66,8 +66,10 @@ class FoodItem {
   }
 
   String toInsertSQL(String tableName, String Function(String) escapeSql) {
-    return "INSERT OR REPLACE INTO $tableName ($kColName, $kColPrice, $kColProtein, $kColKcal, $kColGrams) "
-        "VALUES ('${escapeSql(name)}', $price, $protein100g, $kcal100g, $grams);";
+    final escTable = escapeSql(tableName);
+    final escName = escapeSql(name);
+    return "INSERT OR REPLACE INTO $escTable ($kColName, $kColPrice, $kColProtein, $kColKcal, $kColGrams) "
+        "VALUES ('$escName', $price, $protein100g, $kcal100g, $grams);";
   }
 
   factory FoodItem.fromMap(Map<String, dynamic> map) {
