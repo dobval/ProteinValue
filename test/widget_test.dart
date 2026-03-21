@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:proteinvalue/models/food_item.dart';
+import 'package:proteinvalue/views/add_food_dialog.dart';
 
 class _SortBy {
   static const protein = _SortBy._('protein');
@@ -234,6 +236,345 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('Protein/100g'), findsOneWidget);
+    });
+  });
+
+  group('food item list interaction tests', () {
+    testWidgets('tapping food item triggers onTap callback', (tester) async {
+      bool tapped = false;
+      final item = FoodItem.create(
+        name: 'Chicken Breast',
+        price: 5.99,
+        protein100g: 31,
+        kcal100g: 165,
+        grams: 200,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: GestureDetector(
+            onTap: () => tapped = true,
+            onLongPress: () {},
+            child: Container(
+              color: Colors.white,
+              child: Row(
+                children: [
+                  Expanded(
+                      flex: 2,
+                      child: Text(item.name, overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.price}',
+                          overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.protein100g}',
+                          overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.kcal100g}',
+                          overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.grams}',
+                          overflow: TextOverflow.ellipsis)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump();
+      await tester.tap(find.text('Chicken Breast'));
+      await tester.pump();
+
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('long-pressing food item triggers onLongPress callback',
+        (tester) async {
+      bool longPressed = false;
+      final item = FoodItem.create(
+        name: 'Eggs',
+        price: 2.50,
+        protein100g: 13,
+        kcal100g: 155,
+        grams: 100,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: GestureDetector(
+            onTap: () {},
+            onLongPress: () => longPressed = true,
+            child: Container(
+              color: Colors.white,
+              child: Row(
+                children: [
+                  Expanded(
+                      flex: 2,
+                      child: Text(item.name, overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.price}',
+                          overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.protein100g}',
+                          overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.kcal100g}',
+                          overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${item.grams}',
+                          overflow: TextOverflow.ellipsis)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump();
+      await tester.longPress(find.text('Eggs'));
+      await tester.pump();
+
+      expect(longPressed, isTrue);
+    });
+
+    testWidgets('food item list row displays all food item data correctly',
+        (tester) async {
+      final item = FoodItem.create(
+        name: 'Greek Yogurt',
+        price: 3.49,
+        protein100g: 10,
+        kcal100g: 59,
+        grams: 150,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Container(
+            color: Colors.white,
+            child: Row(
+              children: [
+                Expanded(
+                    flex: 2,
+                    child: Text(item.name, overflow: TextOverflow.ellipsis)),
+                Expanded(
+                    flex: 1,
+                    child:
+                        Text('${item.price}', overflow: TextOverflow.ellipsis)),
+                Expanded(
+                    flex: 1,
+                    child: Text('${item.protein100g}',
+                        overflow: TextOverflow.ellipsis)),
+                Expanded(
+                    flex: 1,
+                    child: Text('${item.kcal100g}',
+                        overflow: TextOverflow.ellipsis)),
+                Expanded(
+                    flex: 1,
+                    child:
+                        Text('${item.grams}', overflow: TextOverflow.ellipsis)),
+              ],
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump();
+
+      expect(find.text('Greek Yogurt'), findsOneWidget);
+      expect(find.text('3.49'), findsOneWidget);
+      expect(find.text('10'), findsOneWidget);
+      expect(find.text('59'), findsOneWidget);
+      expect(find.text('150'), findsOneWidget);
+    });
+  });
+
+  group('RED: food dialog edit mode tests', () {
+    testWidgets('FoodDialog shows "Edit Food" title when editing',
+        (tester) async {
+      final item = FoodItem.create(
+        name: 'Tuna',
+        price: 4.00,
+        protein100g: 25,
+        kcal100g: 132,
+        grams: 180,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) {
+            return ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => FoodDialog(
+                    initialItem: item,
+                    onSave: (_) async {},
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          }),
+        ),
+      ));
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit Food'), findsOneWidget);
+    });
+
+    testWidgets('FoodDialog shows "Update" button when editing',
+        (tester) async {
+      final item = FoodItem.create(
+        name: 'Salmon',
+        price: 8.00,
+        protein100g: 20,
+        kcal100g: 208,
+        grams: 200,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) {
+            return ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => FoodDialog(
+                    initialItem: item,
+                    onSave: (_) async {},
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          }),
+        ),
+      ));
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Update'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+    });
+
+    testWidgets('FoodDialog pre-fills all fields from food item',
+        (tester) async {
+      final item = FoodItem.create(
+        name: 'Beef Steak',
+        price: 7.50,
+        protein100g: 26,
+        kcal100g: 271,
+        grams: 250,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) {
+            return ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => FoodDialog(
+                    initialItem: item,
+                    onSave: (_) async {},
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          }),
+        ),
+      ));
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Beef Steak'), findsOneWidget);
+      expect(find.text('7.5'), findsOneWidget);
+      expect(find.text('26'), findsOneWidget);
+      expect(find.text('271'), findsOneWidget);
+      expect(find.text('250'), findsOneWidget);
+    });
+
+    testWidgets('FoodDialog shows "Add Food" title in add mode',
+        (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) {
+            return ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => FoodDialog(
+                    onSave: (_) async {},
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          }),
+        ),
+      ));
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Food'), findsOneWidget);
+      expect(find.text('Add'), findsOneWidget);
+    });
+
+    testWidgets('FoodDialog calls onSave with updated item on submit',
+        (tester) async {
+      final item = FoodItem.create(
+        name: 'Tofu',
+        price: 3.00,
+        protein100g: 8,
+        kcal100g: 76,
+        grams: 100,
+      );
+      FoodItem? savedItem;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) {
+            return ElevatedButton(
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder: (ctx) => FoodDialog(
+                    initialItem: item,
+                    onSave: (f) async => savedItem = f,
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          }),
+        ),
+      ));
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      final nameField = find.byType(TextField).first;
+      await tester.enterText(nameField, 'Tofu Updated');
+
+      await tester.tap(find.text('Update'));
+      await tester.pumpAndSettle();
+
+      expect(savedItem, isNotNull);
+      expect(savedItem!.name, equals('Tofu Updated'));
     });
   });
 }

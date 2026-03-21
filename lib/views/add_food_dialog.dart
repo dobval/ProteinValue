@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:proteinvalue/models/food_item.dart';
-import '../controllers/db_controller.dart';
 
-class AddFoodDialog extends StatefulWidget {
-  final DBController controller;
+class FoodDialog extends StatefulWidget {
+  final FoodItem? initialItem;
+  final Future<void> Function(FoodItem) onSave;
 
-  const AddFoodDialog({
+  const FoodDialog({
     super.key,
-    required this.controller,
+    this.initialItem,
+    required this.onSave,
   });
 
   @override
-  State<AddFoodDialog> createState() => _AddFoodDialogState();
+  State<FoodDialog> createState() => _FoodDialogState();
 }
 
-class _AddFoodDialogState extends State<AddFoodDialog> {
+class _FoodDialogState extends State<FoodDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _priceController;
   late final TextEditingController _protein100gController;
@@ -24,11 +25,24 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _priceController = TextEditingController();
-    _protein100gController = TextEditingController();
-    _kcal100gController = TextEditingController();
-    _gramsController = TextEditingController();
+    _nameController = TextEditingController(
+        text: widget.initialItem != null ? widget.initialItem!.name : '');
+    _priceController = TextEditingController(
+        text: widget.initialItem != null
+            ? widget.initialItem!.price.toString()
+            : '');
+    _protein100gController = TextEditingController(
+        text: widget.initialItem != null
+            ? widget.initialItem!.protein100g.toString()
+            : '');
+    _kcal100gController = TextEditingController(
+        text: widget.initialItem != null
+            ? widget.initialItem!.kcal100g.toString()
+            : '');
+    _gramsController = TextEditingController(
+        text: widget.initialItem != null
+            ? widget.initialItem!.grams.toString()
+            : '');
   }
 
   @override
@@ -41,10 +55,12 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     super.dispose();
   }
 
+  bool get _isEditing => widget.initialItem != null;
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add Food'),
+      title: Text(_isEditing ? 'Edit Food' : 'Add Food'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -84,7 +100,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
         ),
         TextButton(
           onPressed: _submit,
-          child: const Text('Add'),
+          child: Text(_isEditing ? 'Update' : 'Add'),
         ),
       ],
     );
@@ -122,7 +138,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     );
 
     try {
-      await widget.controller.addFoodItem(foodItem);
+      await widget.onSave(foodItem);
 
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -131,7 +147,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding food item: $e')),
+        SnackBar(content: Text('Error saving food item: $e')),
       );
     }
   }

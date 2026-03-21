@@ -305,6 +305,7 @@ class _AppHomePageState extends State<AppHomePage> {
             (context, index) {
               final foodItem = _foodItems[index];
               return GestureDetector(
+                onTap: () => _showEditFoodDialog(context, foodItem),
                 onLongPress: () => _showDeleteConfirmationDialog(foodItem),
                 child: Container(
                   color: Colors.white,
@@ -386,7 +387,29 @@ class _AppHomePageState extends State<AppHomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddFoodDialog(controller: _controller);
+        return FoodDialog(
+          onSave: (item) async {
+            await _controller.addFoodItem(item);
+          },
+        );
+      },
+    ).then((result) {
+      if (result == true) {
+        _loadFoodItems();
+      }
+    });
+  }
+
+  void _showEditFoodDialog(BuildContext context, FoodItem item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return FoodDialog(
+          initialItem: item,
+          onSave: (updatedItem) async {
+            await _controller.modifyFoodItem(updatedItem);
+          },
+        );
       },
     ).then((result) {
       if (result == true) {
