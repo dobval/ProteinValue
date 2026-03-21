@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:proteinvalue/controllers/db_controller.dart';
+import 'package:proteinvalue/models/food_item.dart';
+import 'package:proteinvalue/models/rankings.dart';
+import 'package:proteinvalue/utils/ranking_calculator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'models/food_item.dart';
-import 'models/rankings.dart';
 import 'views/folder.dart';
 
 Future<void> main() async {
@@ -53,7 +54,6 @@ class AppHomePage extends StatefulWidget {
 
 class _AppHomePageState extends State<AppHomePage> {
   static const int kTopItemsCount = 10;
-  static const double kRatioScale = 100.0;
 
   final DBController _controller = DBController();
   List<FoodItem> _foodItems = [];
@@ -353,23 +353,7 @@ class _AppHomePageState extends State<AppHomePage> {
   }
 
   double _calculateRankRatio(FoodItem item) {
-    switch (_selectedRanking) {
-      case Rankings.cheapProteinRich:
-        return item.price > 0
-            ? (item.protein100g * item.grams) / (item.price * kRatioScale)
-            : 0;
-      case Rankings.leanProteinRich:
-        return item.kcal100g > 0 ? item.protein100g / item.kcal100g : 0;
-      case Rankings.cheapLeanProteinRich:
-        return (item.price > 0 && item.kcal100g > 0)
-            ? (item.protein100g * item.grams) /
-                (item.price * kRatioScale * item.kcal100g)
-            : 0;
-      case Rankings.cheapHighCalorie:
-        return item.price > 0
-            ? (item.kcal100g * item.grams) / (item.price * kRatioScale)
-            : 0;
-    }
+    return RankingCalculator.calculate(item, _selectedRanking);
   }
 
   Widget _buildRankingView() {
