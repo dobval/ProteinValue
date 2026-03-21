@@ -5,7 +5,7 @@ SourceCode: https://github.com/dobval/ProteinValue
 IssueTracker: https://github.com/dobval/ProteinValue/issues
 Changelog: https://github.com/dobval/ProteinValue/releases
 
-AutoName: ProteinValue
+AutoName: proteinvalue
 
 RepoType: git
 Repo: https://github.com/dobval/ProteinValue.git
@@ -13,7 +13,7 @@ Repo: https://github.com/dobval/ProteinValue.git
 Builds:
   - versionName: 0.1.0
     versionCode: 1
-    commit: 5e8214068bd123ac48e336b70dd9ae071563acda
+    commit: 1315fdd25bca9e6fbef9b55d2d95fcff46c506f6
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@3.24.3
