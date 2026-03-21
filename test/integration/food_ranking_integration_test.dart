@@ -14,19 +14,26 @@ void main() {
     test('rankings: best > good > ok (only protein varies)', () {
       final foods = [
         FoodItem.create(
-            name: 'ok', price: 1.0, protein100g: 10, kcal100g: 100, grams: 100),
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'good',
-            price: 1.0,
-            protein100g: 20,
-            kcal100g: 100,
-            grams: 100),
+          name: 'good',
+          price: 1.0,
+          protein100g: 20,
+          kcal100g: 100,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'best',
-            price: 1.0,
-            protein100g: 30,
-            kcal100g: 100,
-            grams: 100),
+          name: 'best',
+          price: 1.0,
+          protein100g: 30,
+          kcal100g: 100,
+          grams: 100,
+        ),
       ];
 
       final sorted = List<FoodItem>.from(foods)
@@ -40,7 +47,12 @@ void main() {
 
     test('exact values: protein=20, price=1, grams=100 → 20.0', () {
       final food = FoodItem.create(
-          name: 'Test', price: 1.0, protein100g: 20, kcal100g: 100, grams: 100);
+        name: 'Test',
+        price: 1.0,
+        protein100g: 20,
+        kcal100g: 100,
+        grams: 100,
+      );
       expect(RankingCalculator.cheapProteinRich(food), equals(20.0));
     });
   });
@@ -49,19 +61,26 @@ void main() {
     test('rankings: best > good > ok (only protein varies)', () {
       final foods = [
         FoodItem.create(
-            name: 'ok', price: 1.0, protein100g: 10, kcal100g: 100, grams: 100),
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'good',
-            price: 1.0,
-            protein100g: 20,
-            kcal100g: 100,
-            grams: 100),
+          name: 'good',
+          price: 1.0,
+          protein100g: 20,
+          kcal100g: 100,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'best',
-            price: 1.0,
-            protein100g: 30,
-            kcal100g: 100,
-            grams: 100),
+          name: 'best',
+          price: 1.0,
+          protein100g: 30,
+          kcal100g: 100,
+          grams: 100,
+        ),
       ];
 
       final sorted = List<FoodItem>.from(foods)
@@ -75,7 +94,12 @@ void main() {
 
     test('exact values: protein=25, kcal=100 → 0.25', () {
       final food = FoodItem.create(
-          name: 'Test', price: 1.0, protein100g: 25, kcal100g: 100, grams: 100);
+        name: 'Test',
+        price: 1.0,
+        protein100g: 25,
+        kcal100g: 100,
+        grams: 100,
+      );
       expect(RankingCalculator.leanProteinRich(food), equals(0.25));
     });
   });
@@ -84,19 +108,26 @@ void main() {
     test('rankings: best > good > ok (only protein varies)', () {
       final foods = [
         FoodItem.create(
-            name: 'ok', price: 1.0, protein100g: 10, kcal100g: 100, grams: 100),
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'good',
-            price: 1.0,
-            protein100g: 20,
-            kcal100g: 100,
-            grams: 100),
+          name: 'good',
+          price: 1.0,
+          protein100g: 20,
+          kcal100g: 100,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'best',
-            price: 1.0,
-            protein100g: 30,
-            kcal100g: 100,
-            grams: 100),
+          name: 'best',
+          price: 1.0,
+          protein100g: 30,
+          kcal100g: 100,
+          grams: 100,
+        ),
       ];
 
       final sorted = List<FoodItem>.from(foods)
@@ -110,7 +141,12 @@ void main() {
 
     test('exact values: protein=50, kcal=100, price=1, grams=100 → 0.5', () {
       final food = FoodItem.create(
-          name: 'Test', price: 1.0, protein100g: 50, kcal100g: 100, grams: 100);
+        name: 'Test',
+        price: 1.0,
+        protein100g: 50,
+        kcal100g: 100,
+        grams: 100,
+      );
       expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.5));
     });
   });
@@ -119,19 +155,26 @@ void main() {
     test('rankings: best > good > ok (only kcal varies)', () {
       final foods = [
         FoodItem.create(
-            name: 'ok', price: 1.0, protein100g: 10, kcal100g: 100, grams: 100),
+          name: 'ok',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 100,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'good',
-            price: 1.0,
-            protein100g: 10,
-            kcal100g: 200,
-            grams: 100),
+          name: 'good',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 200,
+          grams: 100,
+        ),
         FoodItem.create(
-            name: 'best',
-            price: 1.0,
-            protein100g: 10,
-            kcal100g: 300,
-            grams: 100),
+          name: 'best',
+          price: 1.0,
+          protein100g: 10,
+          kcal100g: 300,
+          grams: 100,
+        ),
       ];
 
       final sorted = List<FoodItem>.from(foods)
@@ -145,7 +188,12 @@ void main() {
 
     test('exact values: kcal=250, price=1, grams=100 → 250.0', () {
       final food = FoodItem.create(
-          name: 'Test', price: 1.0, protein100g: 10, kcal100g: 250, grams: 100);
+        name: 'Test',
+        price: 1.0,
+        protein100g: 10,
+        kcal100g: 250,
+        grams: 100,
+      );
       expect(RankingCalculator.cheapHighCalorie(food), equals(250.0));
     });
   });
@@ -153,7 +201,12 @@ void main() {
   group('All rankings handle zero values', () {
     test('returns 0 when price is zero', () {
       final food = FoodItem.create(
-          name: 'Test', price: 0.0, protein100g: 20, kcal100g: 100, grams: 100);
+        name: 'Test',
+        price: 0.0,
+        protein100g: 20,
+        kcal100g: 100,
+        grams: 100,
+      );
 
       expect(RankingCalculator.cheapProteinRich(food), equals(0.0));
       expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.0));
@@ -162,7 +215,12 @@ void main() {
 
     test('returns 0 when kcal is zero', () {
       final food = FoodItem.create(
-          name: 'Test', price: 1.0, protein100g: 20, kcal100g: 0, grams: 100);
+        name: 'Test',
+        price: 1.0,
+        protein100g: 20,
+        kcal100g: 0,
+        grams: 100,
+      );
 
       expect(RankingCalculator.leanProteinRich(food), equals(0.0));
       expect(RankingCalculator.cheapLeanProteinRich(food), equals(0.0));
