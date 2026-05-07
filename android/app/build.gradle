@@ -7,14 +7,14 @@ plugins {
 
 import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 
-def abiCodes = ["armeabi-v7a": 1, "arm64-v8a": 2, "x86_64": 3]
+def abiCodes = ["arm64-v8a": 1, "armeabi-v7a": 2, "x86_64": 3]
 
 android.applicationVariants.configureEach { variant ->
     variant.outputs.configureEach { output ->
         def abiFilter = output.filters.find { it.filterType == "ABI" }
         def abiVersionCode = abiCodes[abiFilter?.identifier]
         if (abiVersionCode != null) {
-            (output as ApkVariantOutputImpl).versionCodeOverride = variant.versionCode * 10 + abiVersionCode
+            (output as ApkVariantOutputImpl).versionCodeOverride = variant.versionCode + abiVersionCode
         }
     }
 }
